@@ -1,71 +1,89 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { validateImageUrl } from '@/lib/utils';
+import { DEFAULT_IMAGES } from '@/lib/constants';
 
 interface BlogCardProps {
   title: string;
-  excerpt: string;
+  excerpt?: string;
+  coverImage?: string;
   author: {
     name: string;
-    image: string;
+    image?: string;
   };
-  coverImage: string;
-  date: string;
+  createdAt: string;
   slug: string;
 }
 
-const BlogCard = ({ title, excerpt, author, coverImage, date, slug }: BlogCardProps) => {
+export default function BlogCard({
+  title,
+  excerpt,
+  coverImage,
+  author,
+  createdAt,
+  slug,
+}: BlogCardProps) {
+  const [validatedCoverImage, setValidatedCoverImage] = useState(DEFAULT_IMAGES.COVER);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    validateImageUrl(coverImage).then(setValidatedCoverImage);
+  }, [coverImage]);
+
+  if (!mounted) return null;
+
   return (
-    <Link href={`/post/${slug}`}>
-      <article className="group cursor-pointer border rounded-lg overflow-hidden">
-        <div className="relative w-full h-60">
+    <Link href={`/post/${slug}`} className="group">
+      <article className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition hover:shadow-lg">
+        <div className="relative h-48 w-full">
           <Image
-            src={coverImage}
+            src={validatedCoverImage}
             alt={title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-200 ease-in-out"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
-        <div className="p-5">
-          <div className="flex items-center space-x-3 mb-4">
-            <Image
-              src={author.image}
-              alt={author.name}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-            <div>
-              <p className="font-medium">{author.name}</p>
-              <p className="text-sm text-gray-500">
-                {format(new Date(date), 'MMM dd, yyyy')}
+
+        <div className="p-4 sm:p-6">
+          <time
+            dateTime={createdAt}
+            className="block text-xs text-gray-500 dark:text-gray-400"
+          >
+            {format(new Date(createdAt), 'MMMM d, yyyy')}
+          </time>
+
+          <h3 className="mt-0.5 text-lg font-medium text-gray-900 dark:text-white">
+            {title}
+          </h3>
+
+          {excerpt && (
+            <p className="mt-2 line-clamp-3 text-sm/relaxed text-gray-700 dark:text-gray-300">
+              {excerpt}
+            </p>
+          )}
+
+          <div className="mt-4 flex items-center gap-3">
+            <div className="relative h-8 w-8 rounded-full">
+              <Image
+                src={author.image || DEFAULT_IMAGES.AUTHOR}
+                alt={author.name}
+                fill
+                className="rounded-full object-cover"
+              />
+            </div>
+            <div className="text-sm">
+              <p className="font-medium text-gray-900 dark:text-white">
+                {author.name}
               </p>
             </div>
-          </div>
-          <h2 className="text-2xl font-bold mb-2 group-hover:text-gray-700">
-            {title}
-          </h2>
-          <p className="text-gray-500 line-clamp-3">{excerpt}</p>
-          <div className="mt-4 flex items-center text-sm">
-            <span className="text-gray-500">Read more</span>
-            <svg
-              className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
           </div>
         </div>
       </article>
     </Link>
   );
-};
-
-export default BlogCard;
+}

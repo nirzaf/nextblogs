@@ -2,11 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 import { generateSlug, ensureUniqueSlug } from '@/lib/utils';
-
-const DEFAULT_AUTHOR = {
-    name: 'M.F.M Fazrin',
-    image: 'https://ik.imagekit.io/fazrinphcc/myprofilepic - crropped.jpg?updatedAt=1725949317901'
-};
+import { DEFAULT_AUTHOR } from '@/lib/constants';
 
 export async function GET() {
     try {
@@ -39,18 +35,19 @@ export async function POST(request: Request) {
             .replace(/[#*`]/g, '') // Remove markdown characters
             .trim() + '...';
 
-        // Prepare blog data
+        // Prepare blog data with default author
         const blogData = {
             ...body,
             slug,
             excerpt,
-            author: {
-                name: body.author?.name || DEFAULT_AUTHOR.name,
-                image: body.author?.image || DEFAULT_AUTHOR.image
-            },
-            coverImage: body.coverImage || '/default-cover.jpg',
+            author: DEFAULT_AUTHOR,
             tags: Array.isArray(body.tags) ? body.tags : []
         };
+
+        // Only include coverImage if it's provided
+        if (body.coverImage) {
+            blogData.coverImage = body.coverImage;
+        }
 
         console.log('Creating blog with data:', blogData);
         const blog = await Blog.create(blogData);

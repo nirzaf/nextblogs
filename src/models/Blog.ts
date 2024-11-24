@@ -17,11 +17,6 @@ export interface IBlog extends Document {
   updatedAt: Date;
 }
 
-const DEFAULT_AUTHOR = {
-  name: 'M.F.M Fazrin',
-  image: 'https://ik.imagekit.io/fazrinphcc/myprofilepic - crropped.jpg?updatedAt=1725949317901'
-};
-
 const BlogSchema: Schema = new Schema({
   title: { 
     type: String, 
@@ -39,17 +34,16 @@ const BlogSchema: Schema = new Schema({
   },
   coverImage: { 
     type: String, 
-    default: '/default-cover.jpg'
+    required: false
   },
   author: {
     name: { 
       type: String, 
-      required: [true, 'Author name is required'], 
-      default: DEFAULT_AUTHOR.name
+      required: [true, 'Author name is required']
     },
     image: { 
-      type: String, 
-      default: DEFAULT_AUTHOR.image 
+      type: String,
+      required: false
     }
   },
   slug: { 
@@ -58,17 +52,8 @@ const BlogSchema: Schema = new Schema({
     unique: true 
   },
   tags: [{ 
-    type: String, 
-    default: [] 
-  }],
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
-  }
+    type: String 
+  }]
 }, {
   timestamps: true
 });
@@ -82,5 +67,7 @@ BlogSchema.pre('save', function(next) {
     next();
 });
 
-// Use existing model or create new one
-export default models.Blog || model<IBlog>('Blog', BlogSchema);
+// Check if the model exists before creating a new one
+const Blog = models.Blog || model('Blog', BlogSchema);
+
+export default Blog;

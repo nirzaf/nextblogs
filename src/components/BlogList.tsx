@@ -6,13 +6,13 @@ import BlogCard from './BlogCard';
 interface Blog {
   _id: string;
   title: string;
-  excerpt: string;
   content: string;
+  excerpt?: string;
   author: {
     name: string;
-    image: string;
+    image?: string;
   };
-  coverImage: string;
+  coverImage?: string;
   slug: string;
   createdAt: string;
   tags: string[];
@@ -34,6 +34,7 @@ export default function BlogList() {
         setBlogs(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch blogs');
+        console.error('Error fetching blogs:', err);
       } finally {
         setLoading(false);
       }
@@ -45,7 +46,7 @@ export default function BlogList() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     );
   }
@@ -53,10 +54,10 @@ export default function BlogList() {
   if (error) {
     return (
       <div className="text-center py-10">
-        <p className="text-red-500">{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+        <p className="text-red-500 dark:text-red-400">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
         >
           Try Again
         </button>
@@ -67,7 +68,7 @@ export default function BlogList() {
   if (blogs.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-gray-600">No blogs found.</p>
+        <p className="text-gray-600 dark:text-gray-400">No blog posts found.</p>
       </div>
     );
   }
@@ -79,12 +80,9 @@ export default function BlogList() {
           key={blog._id}
           title={blog.title}
           excerpt={blog.excerpt}
-          author={{
-            name: blog.author.name,
-            image: blog.author.image || '/default-avatar.png' // Fallback image
-          }}
-          coverImage={blog.coverImage || '/default-cover.jpg'} // Fallback image
-          date={blog.createdAt}
+          coverImage={blog.coverImage}
+          author={blog.author}
+          createdAt={blog.createdAt}
           slug={blog.slug}
         />
       ))}

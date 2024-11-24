@@ -1,4 +1,4 @@
-import Blog from '@/models/Blog';
+import { DEFAULT_IMAGES } from './constants';
 
 export function generateSlug(title: string): string {
   return title
@@ -9,7 +9,13 @@ export function generateSlug(title: string): string {
     .trim();
 }
 
+// Only use this function server-side
 export async function ensureUniqueSlug(baseSlug: string): Promise<string> {
+  if (typeof window !== 'undefined') {
+    throw new Error('ensureUniqueSlug can only be used on the server side');
+  }
+  
+  const Blog = (await import('@/models/Blog')).default;
   let slug = baseSlug;
   let counter = 1;
   let exists = true;
@@ -26,4 +32,28 @@ export async function ensureUniqueSlug(baseSlug: string): Promise<string> {
   }
 
   return slug;
+}
+
+export async function validateImageUrl(url: string | undefined | null): Promise<string> {
+  // If URL is empty or undefined, return default cover image
+  if (!url) {
+    return DEFAULT_IMAGES.COVER;
+  }
+
+  // If it's a local image from public folder, return as is
+  if (url.startsWith('/')) {
+    return url;
+  }
+
+  try {
+    // Try to fetch the image headers to check if it exists and is an image
+    const response = await fetch(url, { method: 'HEAD' });
+    if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) {
+      return DEFAULT_IMAGES.COVER;
+    }
+    return url;
+  } catch (error) {
+    // If there's any error (network, invalid URL, etc.), return default image
+    return DEFAULT_IMAGES.COVER;
+  }
 }
