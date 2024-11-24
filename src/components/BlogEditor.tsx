@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import ImageUpload from './ImageUpload';
 
 interface BlogEditorProps {
   initialData?: {
@@ -31,29 +32,41 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
     setError(null);
 
     try {
+      const blogData = {
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        coverImage: formData.coverImage.trim() || undefined,
+        tags: formData.tags
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(Boolean),
+        author: {
+          name: 'M.F.M Fazrin',
+          image: '/default-avatar.jpg'
+        }
+      };
+
+      console.log('Submitting blog data:', blogData);
+
       const response = await fetch('/api/blogs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-          author: {
-            name: 'M.F.M Fazrin', // You might want to make this dynamic
-            image: '/avatar.jpg'   // You might want to make this dynamic
-          }
-        }),
+        body: JSON.stringify(blogData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || 'Failed to create blog post');
       }
 
-      const blog = await response.json();
-      router.push(`/post/${blog.slug}`);
+      console.log('Blog created successfully:', data);
+      router.push(`/post/${data.slug}`);
+      router.refresh();
     } catch (err) {
+      console.error('Error creating blog:', err);
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
@@ -98,20 +111,19 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
 
       <div>
         <label htmlFor="coverImage" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Cover Image URL
+          Cover Image
         </label>
-        <input
-          type="url"
-          id="coverImage"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-          value={formData.coverImage}
-          onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-        />
+        <div className="mt-1">
+          <ImageUpload
+            currentImage={formData.coverImage}
+            onImageUpload={(imageUrl) => setFormData({ ...formData, coverImage: imageUrl })}
+          />
+        </div>
       </div>
 
       <div>
         <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Tags (comma-separated)
+          Tags (comma-separated, optional)
         </label>
         <input
           type="text"
@@ -128,6 +140,7 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
           type="button"
           onClick={() => router.back()}
           className="mr-4 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+          disabled={loading}
         >
           Cancel
         </button>
