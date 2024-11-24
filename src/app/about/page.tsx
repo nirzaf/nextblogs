@@ -91,25 +91,25 @@ export default function AboutPage() {
 
         {/* Buy Me A Coffee Section */}
         <motion.div 
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 p-8 mb-16 text-white"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07091c] to-[#4d9fff] p-8 mb-16 text-white"
           variants={fadeIn}
           initial="initial"
           animate="animate"
         >
           <div className="relative z-10">
             <h3 className="text-2xl font-bold mb-3">Support My Work</h3>
-            <p className="text-yellow-50 mb-6 max-w-lg">
+            <p className="text-blue-50 mb-6 max-w-lg">
               Your contribution helps me create more content and improve this blog. Every coffee counts! ☕
             </p>
             <Link
               href="#"
-              className="inline-flex items-center space-x-2 bg-white text-yellow-500 px-6 py-3 rounded-full font-medium hover:bg-yellow-50 transition-colors duration-200"
+              className="inline-flex items-center space-x-2 bg-white text-[#07091c] px-6 py-3 rounded-full font-medium hover:bg-opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               <Coffee className="w-5 h-5" />
               <span>Buy me a coffee</span>
             </Link>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/50 to-orange-500/50 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#07091c]/30 to-[#4d9fff]/30 backdrop-blur-[2px]" />
         </motion.div>
 
         {/* Summary Section */}
