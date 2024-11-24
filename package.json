@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@tailwindcss/typography": "^0.5.15",
     "date-fns": "^4.1.0",
+    "framer-motion": "^11.11.17",
     "lucide-react": "^0.460.0",
     "next": "^14.0.4",
     "next-mdx-remote": "^5.0.0",
