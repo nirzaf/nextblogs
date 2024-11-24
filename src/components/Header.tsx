@@ -11,9 +11,9 @@ const Header = () => {
           <Image
             src="https://ik.imagekit.io/quadrate/assets/QTS%20PNG.png?updatedAt=1732465331710"
             alt="Logo"
-            width={88}
-            height={24}
-            className="w-24 object-contain cursor-pointer"
+            width={70}
+            height={19}
+            className="w-20 object-contain cursor-pointer"
           />
         </Link>
         <div className="hidden md:inline-flex items-center space-x-5">
