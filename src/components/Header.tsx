@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { ThemeToggle } from './theme-toggle';
 
 const Header = () => {
   return (
@@ -8,7 +9,7 @@ const Header = () => {
       <div className="flex items-center space-x-5">
         <Link href="/">
           <Image
-            src="https://ik.imagekit.io/quadrate/assets/QTS%20PNG.png?updatedAt=1732462180868"
+            src="https://ik.imagekit.io/quadrate/assets/QTS%20PNG.png?updatedAt=1732465331710"
             alt="Logo"
             width={176}
             height={48}
@@ -24,8 +25,8 @@ const Header = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-5 text-black">
-        <div className="flex items-center space-x-2 border rounded-full px-4 py-1">
+      <div className="flex items-center space-x-5 text-black dark:text-white">
+        <div className="flex items-center space-x-2 border rounded-full px-4 py-1 dark:border-gray-700">
           <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
           <input
             type="text"
@@ -33,7 +34,8 @@ const Header = () => {
             className="flex-1 outline-none bg-transparent"
           />
         </div>
-        <button className="border px-4 py-1 rounded-full border-black hover:bg-black hover:text-white">
+        <ThemeToggle />
+        <button className="border px-4 py-1 rounded-full border-current hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
           Sign In
         </button>
       </div>
