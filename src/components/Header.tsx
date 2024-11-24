@@ -1,9 +1,31 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { ThemeToggle } from './theme-toggle';
+import { useState, useEffect } from 'react';
 
 const Header = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <header className="flex items-center justify-between p-5 max-w-7xl mx-auto">
+        <div className="flex items-center space-x-5">
+          <div className="w-20 h-[19px]" />
+        </div>
+        <div className="flex items-center space-x-5">
+          <div className="w-20 h-8" />
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="flex items-center justify-between p-5 max-w-7xl mx-auto">
       <div className="flex items-center space-x-5">
@@ -14,6 +36,7 @@ const Header = () => {
             width={70}
             height={19}
             className="w-20 object-contain cursor-pointer"
+            priority
           />
         </Link>
         <div className="hidden md:inline-flex items-center space-x-5">

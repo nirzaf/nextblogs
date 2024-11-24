@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 
 interface ImageUploadProps {
@@ -9,9 +9,17 @@ interface ImageUploadProps {
 }
 
 export default function ImageUpload({ onImageUpload, currentImage }: ImageUploadProps) {
+    const [mounted, setMounted] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [preview, setPreview] = useState<string | null>(currentImage || null);
+    const [preview, setPreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        setMounted(true);
+        if (currentImage) {
+            setPreview(currentImage);
+        }
+    }, [currentImage]);
 
     const handleUpload = useCallback(async (file: File) => {
         setUploading(true);
@@ -61,6 +69,10 @@ export default function ImageUpload({ onImageUpload, currentImage }: ImageUpload
         }
     }, [onImageUpload]);
 
+    if (!mounted) {
+        return null;
+    }
+
     return (
         <div className="space-y-4">
             {error && (
@@ -78,6 +90,7 @@ export default function ImageUpload({ onImageUpload, currentImage }: ImageUpload
                                     width={300}
                                     height={200}
                                     className="object-cover rounded-lg"
+                                    suppressHydrationWarning
                                 />
                             </div>
                         ) : (

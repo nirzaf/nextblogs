@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUpload from './ImageUpload';
+import { FiImage } from 'react-icons/fi';
 
 interface BlogEditorProps {
   initialData?: {
@@ -16,8 +17,10 @@ interface BlogEditorProps {
 
 export default function BlogEditor({ initialData, isEditing = false }: BlogEditorProps) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showImageUpload, setShowImageUpload] = useState(false);
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -25,6 +28,11 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
     coverImage: initialData?.coverImage || '',
     tags: initialData?.tags?.join(', ') || ''
   });
+
+  // Avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -73,84 +81,111 @@ export default function BlogEditor({ initialData, isEditing = false }: BlogEdito
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const target = e.target as HTMLTextAreaElement;
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      
+      const newContent = formData.content.substring(0, start) + '    ' + formData.content.substring(end);
+      setFormData({ ...formData, content: newContent });
+      
+      // Set cursor position after the inserted tabs
+      setTimeout(() => {
+        target.selectionStart = target.selectionEnd = start + 4;
+      }, 0);
+    }
+  };
+
+  if (!mounted) {
+    return null; // Return null on first render to avoid hydration mismatch
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto p-6">
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6">
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
           <p className="text-red-700">{error}</p>
         </div>
       )}
 
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Title
-        </label>
+      <div className="mb-8">
         <input
           type="text"
-          id="title"
-          required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+          placeholder="Title"
+          className="w-full text-4xl font-bold border-none outline-none bg-transparent dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          suppressHydrationWarning
         />
       </div>
 
-      <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Content (Markdown supported)
-        </label>
+      <div className="relative mb-8">
+        <div className="flex items-center space-x-4 mb-4">
+          <button
+            type="button"
+            onClick={() => setShowImageUpload(!showImageUpload)}
+            className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 bg-white rounded-full border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+          >
+            <FiImage className="w-5 h-5" />
+            <span>Add Cover Image</span>
+          </button>
+        </div>
+
+        {showImageUpload && (
+          <div className="mb-6">
+            <ImageUpload
+              currentImage={formData.coverImage}
+              onImageUpload={(imageUrl) => {
+                setFormData({ ...formData, coverImage: imageUrl });
+                setShowImageUpload(false);
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="mb-8">
         <textarea
-          id="content"
-          required
-          rows={15}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+          placeholder="Tell your story..."
+          className="w-full min-h-[500px] text-lg leading-relaxed border-none outline-none bg-transparent dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none"
           value={formData.content}
           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          onKeyDown={handleKeyDown}
+          suppressHydrationWarning
         />
       </div>
 
-      <div>
-        <label htmlFor="coverImage" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Cover Image
-        </label>
-        <div className="mt-1">
-          <ImageUpload
-            currentImage={formData.coverImage}
-            onImageUpload={(imageUrl) => setFormData({ ...formData, coverImage: imageUrl })}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Tags (comma-separated, optional)
-        </label>
+      <div className="mb-8">
         <input
           type="text"
-          id="tags"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+          placeholder="Add tags (comma-separated)"
+          className="w-full px-4 py-2 text-sm border border-gray-300 rounded-full dark:border-gray-600 dark:bg-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           value={formData.tags}
           onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-          placeholder="nextjs, react, mongodb"
+          suppressHydrationWarning
         />
       </div>
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mr-4 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-          disabled={loading}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Saving...' : isEditing ? 'Update Post' : 'Create Post'}
-        </button>
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t dark:border-gray-800 p-4">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading || !formData.title.trim() || !formData.content.trim()}
+            className="px-6 py-2 text-sm text-white bg-green-600 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Publishing...' : 'Publish'}
+          </button>
+        </div>
       </div>
     </form>
   );

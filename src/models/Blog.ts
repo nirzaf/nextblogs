@@ -1,9 +1,14 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, model, models } from 'mongoose';
+
+export interface IAuthor {
+  name: string;
+  image: string;
+}
 
 export interface IBlog extends Document {
   title: string;
   content: string;
-  author: string;
+  author: IAuthor;
   slug: string;
   excerpt: string;
   coverImage?: string;
@@ -12,39 +17,70 @@ export interface IBlog extends Document {
   updatedAt: Date;
 }
 
+const DEFAULT_AUTHOR = {
+  name: 'M.F.M Fazrin',
+  image: 'https://ik.imagekit.io/fazrinphcc/myprofilepic - crropped.jpg?updatedAt=1725949317901'
+};
+
 const BlogSchema: Schema = new Schema({
   title: { 
     type: String, 
-    required: true 
+    required: [true, 'Title is required'],
+    minlength: [3, 'Title must be at least 3 characters long'],
+    maxlength: [100, 'Title cannot be more than 100 characters']
   },
   content: { 
     type: String, 
-    required: true 
+    required: [true, 'Content is required'] 
   },
-  author: { 
+  excerpt: { 
     type: String, 
-    required: true 
+    maxlength: [200, 'Excerpt cannot be more than 200 characters']
+  },
+  coverImage: { 
+    type: String, 
+    default: '/default-cover.jpg'
+  },
+  author: {
+    name: { 
+      type: String, 
+      required: [true, 'Author name is required'], 
+      default: DEFAULT_AUTHOR.name
+    },
+    image: { 
+      type: String, 
+      default: DEFAULT_AUTHOR.image 
+    }
   },
   slug: { 
     type: String, 
     required: true, 
     unique: true 
   },
-  excerpt: { 
-    type: String, 
-    required: true 
-  },
-  coverImage: { 
-    type: String 
-  },
   tags: [{ 
-    type: String 
-  }]
+    type: String, 
+    default: [] 
+  }],
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
+  updatedAt: { 
+    type: Date, 
+    default: Date.now 
+  }
 }, {
   timestamps: true
 });
 
-// Add text index for search functionality
+// Create text indexes for search
 BlogSchema.index({ title: 'text', content: 'text', tags: 'text' });
 
-export default mongoose.models.Blog || mongoose.model<IBlog>('Blog', BlogSchema);
+// Update the updatedAt timestamp on save
+BlogSchema.pre('save', function(next) {
+    this.updatedAt = new Date();
+    next();
+});
+
+// Use existing model or create new one
+export default models.Blog || model<IBlog>('Blog', BlogSchema);
