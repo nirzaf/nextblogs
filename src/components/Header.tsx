@@ -17,9 +17,16 @@ const Header = () => {
           />
         </Link>
         <div className="hidden md:inline-flex items-center space-x-5">
-          <Link href="/about" className="hover:text-gray-500">About</Link>
-          <Link href="/contact" className="hover:text-gray-500">Contact</Link>
-          <Link href="/write" className="text-white bg-black px-4 py-1 rounded-full hover:bg-gray-900">
+          <Link href="/" className="hover:text-gray-500 dark:text-white dark:hover:text-gray-300">
+            Blogs
+          </Link>
+          <Link href="/about" className="hover:text-gray-500 dark:text-white dark:hover:text-gray-300">
+            About
+          </Link>
+          <Link href="/contact" className="hover:text-gray-500 dark:text-white dark:hover:text-gray-300">
+            Contact
+          </Link>
+          <Link href="/write" className="text-white bg-black px-4 py-1 rounded-full hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100">
             Write
           </Link>
         </div>
