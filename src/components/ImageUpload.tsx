@@ -23,7 +23,7 @@ export default function ImageUpload({ onImageUpload, currentImage }: ImageUpload
             const auth = await authResponse.json();
 
             if (!authResponse.ok) {
-                throw new Error('Failed to get upload credentials');
+                throw new Error(auth.error || 'Failed to get upload credentials');
             }
 
             // Create form data
@@ -31,9 +31,10 @@ export default function ImageUpload({ onImageUpload, currentImage }: ImageUpload
             formData.append('file', file);
             formData.append('publicKey', 'public_c+Zi+e7Ltmnekh237lz+18bw6dM=');
             formData.append('signature', auth.signature);
-            formData.append('expire', auth.expire);
+            formData.append('expire', auth.expire.toString());
             formData.append('token', auth.token);
             formData.append('fileName', `blog-${Date.now()}-${file.name}`);
+            formData.append('useUniqueFileName', 'true');
 
             // Upload to ImageKit
             const uploadResponse = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
@@ -44,12 +45,14 @@ export default function ImageUpload({ onImageUpload, currentImage }: ImageUpload
             const uploadResult = await uploadResponse.json();
 
             if (!uploadResponse.ok) {
+                console.error('Upload error response:', uploadResult);
                 throw new Error(uploadResult.message || 'Failed to upload image');
             }
 
             // Set preview and notify parent
-            setPreview(uploadResult.url);
-            onImageUpload(uploadResult.url);
+            const imageUrl = uploadResult.url;
+            setPreview(imageUrl);
+            onImageUpload(imageUrl);
         } catch (err) {
             console.error('Upload error:', err);
             setError(err instanceof Error ? err.message : 'Failed to upload image');
